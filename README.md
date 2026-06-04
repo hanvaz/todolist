@@ -6,34 +6,6 @@ Tính năng
 - Chỉnh sửa công việc (Update)
 - Xóa công việc (Delete)
 
- Cấu trúc Thư mục
-
-ToDoList/
-├── server/
-│   ├── server.js              # Main server file
-│   └── package.json           # Server dependencies
-│
-└── client/
-    ├── public/
-    │   └── index.html         # HTML template
-    ├── src/
-    │   ├── components/
-    │   │   ├── TodoForm.js     # Form thêm công việc
-    │   │   ├── TodoForm.css
-    │   │   ├── TodoList.js     # Danh sách công việc
-    │   │   ├── TodoList.css
-    │   │   ├── TodoItem.js     # Từng công việc
-    │   │   └── TodoItem.css
-    │   ├── App.js              # Main component
-    │   ├── App.css
-    │   ├── index.js            # Entry point
-    │   ├── index.css
-    │   └── package.json        # Frontend dependencies
-Ghi chú
-
-- Dữ liệu lưu trong memory, sẽ mất khi restart server
-- Để persist data, có thể thêm database (MongoDB, PostgreSQL)
-
 Cải tiến trong tương lai
 
 - [ ] Thêm database (MongoDB/PostgreSQL)
