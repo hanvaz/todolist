@@ -1,0 +1,60 @@
+.todo-list {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.todo-list.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  min-height: 300px;
+}
+
+.empty-state {
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  color: #667eea;
+}
+
+.empty-icon .ti {
+  font-size: 80px;
+}
+
+.empty-state p {
+  font-size: 18px;
+  color: #666;
+  margin: 10px 0;
+  font-weight: 500;
+}
+
+.empty-subtitle {
+  font-size: 14px !important;
+  color: #999 !important;
+  font-weight: 400 !important;
+}
+
+/* Scrollbar styling */
+.todo-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.todo-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.todo-list::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+.todo-list::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
