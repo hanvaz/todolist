@@ -1,19 +1,37 @@
-Một ứng dụng Todo List đầy đủ được xây dựng bằng **React**, **Node.js/Express** và **CSS3** để quản lý công việc hàng ngày.
+# Cài đặt
 
-Tính năng
-- Tạo công việc mới (Create)
-- Xem danh sách công việc (Read)
-- Chỉnh sửa công việc (Update)
-- Xóa công việc (Delete)
+## Clone project
 
-Cải tiến trong tương lai
+```bash
+git clone https://github.com/hanvaz/todolist.git
+```
 
-- [ ] Thêm database (MongoDB/PostgreSQL)
-- [ ] Authentication & Authorization
-- [ ] Pagination
-- [ ] Filter & Search
-- [ ] Categories/Tags
-- [ ] Due dates & Reminders
-- [ ] Dark mode
-- [ ] Deployment (Heroku, Vercel)
+## Cài đặt Backend
 
+```bash
+cd server
+npm install
+```
+
+## Chạy Backend
+
+```bash
+npm start
+```
+
+# Các package chính
+
+Frontend:
+
+* React
+* Axios
+
+Backend:
+
+* Express
+* CORS
+* UUID
+
+Nếu sử dụng MySQL thì cài thêm:
+
+npm install mysql2

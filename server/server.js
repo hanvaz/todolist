@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { v4: uuidv4 } = require('uuid');
+const db = require('./db');
 
 const app = express();
 const PORT = 5000;
@@ -9,80 +9,183 @@ const PORT = 5000;
 app.use(cors());
 app.use(express.json());
 
-// In-memory database
-let todos = [
-  { id: uuidv4(), title: 'Học React', description: 'Học các khái niệm cơ bản', completed: false, createdAt: new Date() },
-  { id: uuidv4(), title: 'Xây dựng Todo App', description: 'Tạo ứng dụng Todo hoàn chỉnh', completed: false, createdAt: new Date() }
-];
-
-// GET all todos
 app.get('/api/todos', (req, res) => {
-  res.json(todos);
+  db.query(
+    'SELECT * FROM todos ORDER BY created_at DESC',
+    (err, results) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({
+          message: 'Lỗi server'
+        });
+      }
+
+      res.json(results);
+    }
+  );
 });
 
-// GET single todo
 app.get('/api/todos/:id', (req, res) => {
-  const todo = todos.find(t => t.id === req.params.id);
-  if (!todo) {
-    return res.status(404).json({ message: 'Todo không tìm thấy' });
-  }
-  res.json(todo);
+
+  db.query(
+    'SELECT * FROM todos WHERE id=?',
+    [req.params.id],
+    (err, results) => {
+
+      if (err) {
+        return res.status(500).json({
+          message: 'Lỗi server'
+        });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({
+          message: 'Todo không tìm thấy'
+        });
+      }
+
+      res.json(results[0]);
+
+    }
+  );
+
 });
 
-// CREATE new todo
 app.post('/api/todos', (req, res) => {
+
   const { title, description } = req.body;
 
-  if (!title) {
-    return res.status(400).json({ message: 'Tiêu đề không được để trống' });
+  if (!title || title.trim() === '') {
+    return res.status(400).json({
+      message: 'Tiêu đề không được để trống'
+    });
   }
 
-  const newTodo = {
-    id: uuidv4(),
-    title,
-    description: description || '',
-    completed: false,
-    createdAt: new Date()
-  };
+  db.query(
+    'INSERT INTO todos(title, description, completed) VALUES (?, ?, ?)',
+    [
+      title,
+      description || '',
+      false
+    ],
+    (err, result) => {
 
-  todos.push(newTodo);
-  res.status(201).json(newTodo);
+      if (err) {
+        console.error(err);
+        return res.status(500).json({
+          message: 'Không thể thêm công việc'
+        });
+      }
+
+      db.query(
+        'SELECT * FROM todos WHERE id=?',
+        [result.insertId],
+        (err, rows) => {
+
+          if (err) {
+            return res.status(500).json({
+              message: 'Lỗi server'
+            });
+          }
+
+          res.status(201).json(rows[0]);
+
+        }
+      );
+
+    }
+  );
+
 });
 
-// UPDATE todo
 app.put('/api/todos/:id', (req, res) => {
+
   const { title, description, completed } = req.body;
-  const todo = todos.find(t => t.id === req.params.id);
 
-  if (!todo) {
-    return res.status(404).json({ message: 'Todo không tìm thấy' });
-  }
+  db.query(
+    `UPDATE todos
+     SET
+        title = COALESCE(?, title),
+        description = COALESCE(?, description),
+        completed = COALESCE(?, completed)
+     WHERE id=?`,
+    [
+      title,
+      description,
+      completed,
+      req.params.id
+    ],
+    (err) => {
 
-  if (title !== undefined) todo.title = title;
-  if (description !== undefined) todo.description = description;
-  if (completed !== undefined) todo.completed = completed;
+      if (err) {
+        console.error(err);
+        return res.status(500).json({
+          message: 'Không thể cập nhật'
+        });
+      }
 
-  res.json(todo);
+      db.query(
+        'SELECT * FROM todos WHERE id=?',
+        [req.params.id],
+        (err, rows) => {
+
+          if (rows.length === 0) {
+            return res.status(404).json({
+              message: 'Todo không tồn tại'
+            });
+          }
+
+          res.json(rows[0]);
+
+        }
+      );
+
+    }
+  );
+
 });
 
-// DELETE todo
 app.delete('/api/todos/:id', (req, res) => {
-  const index = todos.findIndex(t => t.id === req.params.id);
 
-  if (index === -1) {
-    return res.status(404).json({ message: 'Todo không tìm thấy' });
-  }
+  db.query(
+    'DELETE FROM todos WHERE id=?',
+    [req.params.id],
+    (err, result) => {
 
-  const deletedTodo = todos.splice(index, 1);
-  res.json(deletedTodo[0]);
+      if (err) {
+        console.error(err);
+        return res.status(500).json({
+          message: 'Không thể xóa'
+        });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({
+          message: 'Todo không tồn tại'
+        });
+      }
+
+      res.json({
+        message: 'Xóa thành công'
+      });
+
+    }
+  );
+
 });
 
-// Error handling middleware
 app.use((err, req, res, next) => {
+
   console.error(err.stack);
-  res.status(500).json({ message: 'Lỗi server' });
+
+  res.status(500).json({
+    message: 'Lỗi server'
+  });
+
 });
 
 app.listen(PORT, () => {
-  console.log(`Server chạy tại http://localhost:${PORT}`);
+
+  console.log(`Server đang chạy tại http://localhost:${PORT}`);
+
 });

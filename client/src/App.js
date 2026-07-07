@@ -9,6 +9,9 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
+  // Search
+  const [searchTerm, setSearchTerm] = useState('');
+
   const API_BASE_URL = 'http://localhost:5000/api/todos';
 
   // Fetch all todos
@@ -24,7 +27,6 @@ function App() {
     }
   };
 
-  // Load todos on component mount
   useEffect(() => {
     fetchTodos();
   }, []);
@@ -32,7 +34,11 @@ function App() {
   // Add new todo
   const handleAddTodo = async (title, description) => {
     try {
-      const response = await axios.post(API_BASE_URL, { title, description });
+      const response = await axios.post(API_BASE_URL, {
+        title,
+        description,
+      });
+
       setTodos([...todos, response.data]);
     } catch (error) {
       console.error('Lỗi khi thêm todo:', error);
@@ -43,7 +49,11 @@ function App() {
   const handleUpdateTodo = async (id, updates) => {
     try {
       const response = await axios.put(`${API_BASE_URL}/${id}`, updates);
-      setTodos(todos.map(todo => (todo.id === id ? response.data : todo)));
+
+      setTodos(
+        todos.map((todo) => (todo.id === id ? response.data : todo))
+      );
+
       setEditingId(null);
     } catch (error) {
       console.error('Lỗi khi cập nhật todo:', error);
@@ -54,40 +64,77 @@ function App() {
   const handleDeleteTodo = async (id) => {
     try {
       await axios.delete(`${API_BASE_URL}/${id}`);
-      setTodos(todos.filter(todo => todo.id !== id));
+
+      setTodos(todos.filter((todo) => todo.id !== id));
     } catch (error) {
       console.error('Lỗi khi xóa todo:', error);
     }
   };
 
-  // Toggle todo completion
+  // Toggle complete
   const handleToggleTodo = async (id, completed) => {
-    await handleUpdateTodo(id, { completed: !completed });
+    await handleUpdateTodo(id, {
+      completed: !completed,
+    });
   };
 
-  const completedCount = todos.filter(t => t.completed).length;
+  // Search
+  const filteredTodos = todos.filter((todo) => {
+    const keyword = searchTerm.toLowerCase();
+
+    return (
+      todo.title.toLowerCase().includes(keyword) ||
+      (todo.description &&
+        todo.description.toLowerCase().includes(keyword))
+    );
+  });
+
+  const completedCount = todos.filter((t) => t.completed).length;
 
   return (
     <div className="App">
       <div className="container">
         <header className="header">
-          <h1><i className="ti ti-notepad"></i> Todo List</h1>
-          <p className="subtitle">Quản lý công việc hàng ngày</p>
+          <h1>
+            <i className=""></i>
+            Todo List
+          </h1>
+          <p className="subtitle">
+            Quản lý công việc hàng ngày
+          </p>
         </header>
 
         <div className="stats">
           <div className="stat-item">
-            <span className="stat-label">Tổng:</span>
+            <span className="stat-label">Tổng</span>
             <span className="stat-value">{todos.length}</span>
           </div>
+
           <div className="stat-item">
-            <span className="stat-label">Hoàn thành:</span>
-            <span className="stat-value completed">{completedCount}</span>
+            <span className="stat-label">Hoàn thành</span>
+            <span className="stat-value completed">
+              {completedCount}
+            </span>
           </div>
+
           <div className="stat-item">
-            <span className="stat-label">Còn lại:</span>
-            <span className="stat-value pending">{todos.length - completedCount}</span>
+            <span className="stat-label">Còn lại</span>
+            <span className="stat-value pending">
+              {todos.length - completedCount}
+            </span>
           </div>
+        </div>
+
+        {/* Search */}
+        <div className="search-box">
+          <i className="ti ti-search"></i>
+
+          <input
+            type="text"
+            placeholder="Tìm kiếm công việc..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
 
         <TodoForm onAddTodo={handleAddTodo} />
@@ -96,7 +143,7 @@ function App() {
           <div className="loading">Đang tải...</div>
         ) : (
           <TodoList
-            todos={todos}
+            todos={filteredTodos}
             onToggle={handleToggleTodo}
             onUpdate={handleUpdateTodo}
             onDelete={handleDeleteTodo}
